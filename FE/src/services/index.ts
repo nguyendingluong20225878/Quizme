@@ -1,0 +1,18 @@
+/**
+ * Service Layer Index
+ * Export tất cả services để dễ import
+ */
+
+export * from './authService';
+export * from './userService';
+export * from './missionService';
+export * from './examService';
+export * from './challengeService';
+export * from './achievementService';
+export * from './leaderboardService';
+export * from './flashcardService';
+export * from './analyticsService';
+export * from './roadmapService';
+export * from './aiTeacherService';
+
+export { default as api } from './api';
