@@ -267,6 +267,170 @@ exports.getAllTimeLeaderboard = async (req, res, next) => {
   }
 };
 
+// @desc    Lấy bảng xếp hạng
+// @route   GET /api/leaderboard
+// @access  Public
+exports.getLeaderboard = async (req, res, next) => {
+  try {
+    const { mode = 'weekly', subject, limit = 50 } = req.query;
+    const userId = req.user?.id;
+
+    let startDate = new Date();
+    if (mode === 'weekly') {
+      const dayOfWeek = startDate.getDay();
+      const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      startDate.setDate(startDate.getDate() - diff);
+      startDate.setHours(0, 0, 0, 0);
+    } else if (mode === 'monthly') {
+      startDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+    } else {
+      startDate = new Date(0); // All time
+    }
+
+    const users = await User.find().select('-password');
+    
+    const leaderboardData = await Promise.all(
+      users.map(async (user) => {
+        let attempts;
+        if (mode === 'alltime') {
+          attempts = await ExamAttempt.find({
+            user: user._id,
+            status: 'submitted',
+          });
+        } else {
+          attempts = await ExamAttempt.find({
+            user: user._id,
+            submittedAt: { $gte: startDate },
+            status: 'submitted',
+          });
+        }
+
+        if (subject) {
+          const Subject = require('../models/Subject');
+          const subjectDoc = await Subject.findOne({ name: subject });
+          if (subjectDoc) {
+            attempts = attempts.filter(a => 
+              a.exam && a.exam.subject && a.exam.subject.toString() === subjectDoc._id.toString()
+            );
+          }
+        }
+
+        const score = attempts.reduce((sum, a) => sum + (a.score || 0), 0);
+
+        return {
+          userId: user._id.toString(),
+          name: user.name || user.fullName,
+          avatar: user.avatar,
+          score,
+          isCurrentUser: userId && user._id.toString() === userId,
+        };
+      })
+    );
+
+    leaderboardData.sort((a, b) => b.score - a.score);
+
+    const leaderboard = leaderboardData.slice(0, parseInt(limit)).map((item, index) => ({
+      rank: index + 1,
+      ...item,
+    }));
+
+    const currentUser = leaderboard.find(u => u.isCurrentUser);
+    const currentUserRank = currentUser 
+      ? currentUser.rank 
+      : leaderboardData.findIndex(u => u.isCurrentUser) + 1;
+    const currentUserScore = currentUser 
+      ? currentUser.score 
+      : leaderboardData.find(u => u.isCurrentUser)?.score || 0;
+    const nextRankScore = leaderboard.length > 0 && currentUserRank > 0
+      ? leaderboard[Math.min(currentUserRank - 1, leaderboard.length - 1)]?.score || 0
+      : 0;
+    const pointsToNextRank = Math.max(0, nextRankScore - currentUserScore);
+
+    res.status(200).json({
+      success: true,
+      leaderboard: leaderboard.map(({ isCurrentUser, ...rest }) => rest),
+      currentUser: {
+        rank: currentUserRank || null,
+        score: currentUserScore,
+        pointsToNextRank,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Lấy vị trí của user
+// @route   GET /api/leaderboard/my-rank
+// @access  Private
+exports.getMyRank = async (req, res, next) => {
+  try {
+    const { mode = 'weekly' } = req.query;
+    const userId = req.user.id;
+
+    let startDate = new Date();
+    if (mode === 'weekly') {
+      const dayOfWeek = startDate.getDay();
+      const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      startDate.setDate(startDate.getDate() - diff);
+      startDate.setHours(0, 0, 0, 0);
+    } else if (mode === 'monthly') {
+      startDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      startDate.setHours(0, 0, 0, 0);
+    } else {
+      startDate = new Date(0);
+    }
+
+    const allUsers = await User.find().select('-password');
+    
+    const allScores = await Promise.all(
+      allUsers.map(async (user) => {
+        let attempts;
+        if (mode === 'alltime') {
+          attempts = await ExamAttempt.find({
+            user: user._id,
+            status: 'submitted',
+          });
+        } else {
+          attempts = await ExamAttempt.find({
+            user: user._id,
+            submittedAt: { $gte: startDate },
+            status: 'submitted',
+          });
+        }
+
+        return {
+          userId: user._id.toString(),
+          score: attempts.reduce((sum, a) => sum + (a.score || 0), 0),
+        };
+      })
+    );
+
+    allScores.sort((a, b) => b.score - a.score);
+
+    const userScore = allScores.find(s => s.userId === userId);
+    const rank = userScore ? allScores.findIndex(s => s.userId === userId) + 1 : null;
+    const score = userScore?.score || 0;
+    const totalUsers = allScores.length;
+    const percentile = rank ? Math.round(((totalUsers - rank) / totalUsers) * 100) : 0;
+    
+    // Points to top 20
+    const top20Score = allScores.length >= 20 ? allScores[19].score : 0;
+    const pointsToTop20 = Math.max(0, top20Score - score);
+
+    res.status(200).json({
+      success: true,
+      rank,
+      score,
+      percentile,
+      pointsToTop20,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Lấy leaderboard bạn bè
 // @route   GET /api/leaderboard/friends
 // @access  Private

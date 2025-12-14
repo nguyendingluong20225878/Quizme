@@ -36,14 +36,9 @@ exports.register = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'Đăng ký thành công',
+      userId: user._id,
       token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-      },
+      message: 'Đăng ký thành công',
     });
   } catch (error) {
     next(error);
@@ -108,10 +103,13 @@ exports.login = async (req, res, next) => {
       token,
       user: {
         id: user._id,
-        fullName: user.fullName,
+        name: user.name || user.fullName,
         email: user.email,
-        role: user.role,
-        streakDays: user.streakDays,
+        avatar: user.avatar,
+        onboardingCompleted: user.onboardingCompleted || false,
+        goals: user.goals || [],
+        subjects: user.selectedSubjects?.map(s => s.name || s._id) || [],
+        level: user.level || 1,
       },
     });
   } catch (error) {
@@ -128,7 +126,125 @@ exports.getMe = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: user,
+      user: {
+        id: user._id,
+        name: user.name || user.fullName,
+        email: user.email,
+        avatar: user.avatar,
+        onboardingCompleted: user.onboardingCompleted || false,
+        goals: user.goals || [],
+        subjects: user.selectedSubjects?.map(s => s.name || s._id) || [],
+        level: user.level || 1,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Đăng xuất
+// @route   POST /api/auth/logout
+// @access  Private
+exports.logout = async (req, res, next) => {
+  try {
+    // Với JWT, logout thường được xử lý ở client (xóa token)
+    // Nhưng có thể thêm logic blacklist token nếu cần
+    res.status(200).json({
+      success: true,
+      message: 'Đăng xuất thành công',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Quên mật khẩu
+// @route   POST /api/auth/forgot-password
+// @access  Public
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng nhập email',
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      // Không tiết lộ email có tồn tại hay không vì lý do bảo mật
+      return res.status(200).json({
+        success: true,
+        message: 'Nếu email tồn tại, bạn sẽ nhận được email hướng dẫn đặt lại mật khẩu',
+      });
+    }
+
+    // Tạo reset token
+    const resetToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+
+    // TODO: Gửi email với reset token
+    // const resetUrl = `${req.protocol}://${req.get('host')}/api/auth/reset-password/${resetToken}`;
+    // await sendEmail({
+    //   email: user.email,
+    //   subject: 'Đặt lại mật khẩu',
+    //   message: `Vui lòng click vào link sau để đặt lại mật khẩu: ${resetUrl}`,
+    // });
+
+    res.status(200).json({
+      success: true,
+      message: 'Email đặt lại mật khẩu đã được gửi',
+      // Trong môi trường dev, có thể trả về token để test
+      ...(process.env.NODE_ENV === 'development' && { resetToken }),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Đặt lại mật khẩu
+// @route   POST /api/auth/reset-password
+// @access  Public
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { email, resetToken, newPassword } = req.body;
+
+    if (!email || !resetToken || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng cung cấp đầy đủ thông tin',
+      });
+    }
+
+    // Hash token để so sánh
+    const crypto = require('crypto');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    const user = await User.findOne({
+      email,
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token không hợp lệ hoặc đã hết hạn',
+      });
+    }
+
+    // Set password mới
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Đặt lại mật khẩu thành công',
     });
   } catch (error) {
     next(error);

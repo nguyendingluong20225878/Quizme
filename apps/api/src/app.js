@@ -45,7 +45,6 @@ app.use('/api/questions', require('./routes/questions'));
 app.use('/api/exam-attempts', require('./routes/examAttempts'));
 app.use('/api/topics', require('./routes/topics'));
 app.use('/api/formulas', require('./routes/formulas'));
-app.use('/api/videos', require('./routes/videos'));
 app.use('/api/competencies', require('./routes/competencies'));
 app.use('/api/tips', require('./routes/tips'));
 app.use('/api/missions', require('./routes/missions'));
@@ -56,6 +55,17 @@ app.use('/api/challenges', require('./routes/challenges'));
 app.use('/api/flashcards', require('./routes/flashcards'));
 app.use('/api/learning-paths', require('./routes/learningPaths'));
 app.use('/api/analytics', require('./routes/analytics'));
+
+// New routes
+app.use('/api/onboarding', require('./routes/onboarding'));
+app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/streak', require('./routes/streak'));
+app.use('/api/exam-room', require('./routes/examRoom'));
+app.use('/api/challenge-5min', require('./routes/challenge5Min'));
+app.use('/api/golden-time', require('./routes/goldenTime'));
+app.use('/api/tests', require('./routes/testLibrary'));
+app.use('/api/roadmap', require('./routes/learningPaths')); // Alias for learning-paths
+app.use('/api/profile', require('./routes/profile'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

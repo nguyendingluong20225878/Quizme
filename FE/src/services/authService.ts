@@ -92,11 +92,32 @@ export const authService = {
 
   /**
    * Đăng xuất
-   * Clear token và user data
+   * POST /api/auth/logout
    */
-  logout: () => {
+  logout: async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      // Ignore errors
+    }
     localStorage.removeItem('quizme_token');
     localStorage.removeItem('quizme_user');
+  },
+
+  /**
+   * Quên mật khẩu
+   * POST /api/auth/forgot-password
+   */
+  forgotPassword: async (email: string) => {
+    return api.post('/auth/forgot-password', { email });
+  },
+
+  /**
+   * Đặt lại mật khẩu
+   * POST /api/auth/reset-password
+   */
+  resetPassword: async (email: string, resetToken: string, newPassword: string) => {
+    return api.post('/auth/reset-password', { email, resetToken, newPassword });
   },
 
   /**

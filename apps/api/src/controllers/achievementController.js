@@ -48,12 +48,13 @@ exports.getUserAchievements = async (req, res, next) => {
 };
 
 // @desc    Unlock achievement
-// @route   POST /api/achievements/:id/unlock
+// @route   POST /api/achievements/unlock
+// @route   POST /api/achievements/:id/unlock (legacy)
 // @access  Private
 exports.unlockAchievement = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const achievementId = req.params.id;
+    const achievementId = req.params.id || req.body.achievementId;
 
     const achievement = await Achievement.findById(achievementId);
     if (!achievement) {

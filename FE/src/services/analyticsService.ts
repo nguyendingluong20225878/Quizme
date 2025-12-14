@@ -1,95 +1,75 @@
 /**
  * Analytics Service
- * Phân tích lỗi sai, competency, và performance
+ * Quản lý phân tích dữ liệu học tập
  */
 
 import api from './api';
 
-export interface CompetencyRadar {
+export interface AnalyticsOverview {
+  spiderChart: Array<{ subject: string; score: number }>;
+  progressTrend: Array<{ date: string; score: number }>;
+  errorByDifficulty: any[];
+  errorByType: any[];
+  weakTopics: Array<{
+    topic: string;
+    score: number;
+    trend: 'up' | 'down' | 'stable';
+    wrongQuestions: number;
+    totalQuestions: number;
+    commonErrors: string[];
+  }>;
+}
+
+export interface SubjectAnalysis {
   subject: string;
-  score: number;
-  fullMark: number;
-  attempts: number;
+  overallScore: number;
+  topicBreakdown: any[];
+  strengthsWeaknesses: {
+    strengths: any[];
+    weaknesses: any[];
+  };
+  recommendations: string[];
 }
 
-export interface ErrorByDifficulty {
-  difficulty: string;
-  correct: number;
-  incorrect: number;
-  total: number;
-  percentage: number;
-  color: string;
-}
-
-export interface ErrorByType {
-  type: string;
-  correct: number;
-  incorrect: number;
-  total: number;
-  percentage: number;
-  icon: string;
-  color: string;
-}
-
-export interface ProgressTrend {
-  date: string;
-  score: number;
-  xp?: number;
-}
-
-export interface WeakTopic {
-  id: string;
-  topic: string;
-  score: number;
-  trend: 'up' | 'down' | 'stable';
-  wrongQuestions: number;
-  totalQuestions: number;
-  commonErrors: string[];
-  icon: string;
+export interface ProgressData {
+  data: Array<{
+    date: string;
+    xp: number;
+    accuracy: number;
+    questionsCompleted: number;
+  }>;
+  summary: {
+    totalXP: number;
+    averageAccuracy: number;
+    totalQuestions: number;
+    improvementRate: number;
+  };
 }
 
 export const analyticsService = {
   /**
-   * Lấy competency radar data
-   * GET /api/analytics/competency-radar
+   * Lấy dữ liệu phân tích tổng quan
+   * GET /api/analytics/overview
    */
-  getCompetencyRadar: async (): Promise<CompetencyRadar[]> => {
-    return api.get<any, CompetencyRadar[]>('/analytics/competency-radar');
+  getOverview: async (): Promise<AnalyticsOverview> => {
+    return api.get('/analytics/overview');
   },
 
   /**
-   * Lấy error analysis theo độ khó
-   * GET /api/analytics/error-analysis/by-difficulty
+   * Phân tích theo môn học
+   * GET /api/analytics/subjects/:subject
    */
-  getErrorByDifficulty: async (): Promise<ErrorByDifficulty[]> => {
-    return api.get<any, ErrorByDifficulty[]>('/analytics/error-analysis/by-difficulty');
+  getSubjectAnalysis: async (subject: string): Promise<SubjectAnalysis> => {
+    return api.get(`/analytics/subjects/${subject}`);
   },
 
   /**
-   * Lấy error analysis theo loại câu hỏi
-   * GET /api/analytics/error-analysis/by-type
+   * Phân tích tiến độ theo thời gian
+   * GET /api/analytics/progress
    */
-  getErrorByType: async (): Promise<ErrorByType[]> => {
-    return api.get<any, ErrorByType[]>('/analytics/error-analysis/by-type');
-  },
-
-  /**
-   * Lấy progress trend (tuần/tháng)
-   * GET /api/analytics/progress-trend
-   */
-  getProgressTrend: async (period: 'week' | 'month' = 'week'): Promise<ProgressTrend[]> => {
-    return api.get<any, ProgressTrend[]>('/analytics/progress-trend', {
+  getProgress: async (period: 'week' | 'month' | 'year' = 'week'): Promise<ProgressData> => {
+    return api.get('/analytics/progress', {
       params: { period },
-    });
-  },
-
-  /**
-   * Lấy weak topics (điểm yếu)
-   * GET /api/analytics/weak-topics
-   */
-  getWeakTopics: async (limit?: number): Promise<WeakTopic[]> => {
-    return api.get<any, WeakTopic[]>('/analytics/weak-topics', {
-      params: { limit },
     });
   },
 };

@@ -44,9 +44,17 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    name: {
+      type: String,
+      trim: true,
+    },
     avatar: {
       type: String,
       default: null,
+    },
+    joinDate: {
+      type: Date,
+      default: Date.now,
     },
     isPremium: {
       type: Boolean,
@@ -69,6 +77,41 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       default: 1,
       min: 1,
+    },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
+    goals: [{
+      type: String,
+    }],
+    placementLevel: {
+      type: Number,
+      default: 1,
+    },
+    totalStudyDays: {
+      type: Number,
+      default: 0,
+    },
+    totalTests: {
+      type: Number,
+      default: 0,
+    },
+    totalQuestions: {
+      type: Number,
+      default: 0,
+    },
+    accuracy: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpire: {
+      type: Date,
     },
     selectedSubjects: [
       {
@@ -102,6 +145,22 @@ UserSchema.methods.getSignedJwtToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET || 'your-secret-key', {
     expiresIn: process.env.JWT_EXPIRE || '7d',
   });
+};
+
+// Method để tạo reset password token
+UserSchema.methods.getResetPasswordToken = function () {
+  const resetToken = require('crypto').randomBytes(20).toString('hex');
+  
+  // Hash token và lưu vào database
+  this.resetPasswordToken = require('crypto')
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  
+  // Set expire time (10 minutes)
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  
+  return resetToken;
 };
 
 module.exports = mongoose.model('User', UserSchema);

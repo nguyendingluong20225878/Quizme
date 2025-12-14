@@ -6,6 +6,8 @@
 const express = require('express');
 const router = express.Router();
 const {
+  getLeaderboard,
+  getMyRank,
   getWeeklyLeaderboard,
   getMonthlyLeaderboard,
   getAllTimeLeaderboard,
@@ -13,7 +15,11 @@ const {
 } = require('../controllers/leaderboardController');
 const { protect } = require('../middleware/auth');
 
-// Public routes
+// New API endpoints
+router.get('/', getLeaderboard);
+router.get('/my-rank', protect, getMyRank);
+
+// Legacy endpoints (keep for backward compatibility)
 router.route('/weekly').get(getWeeklyLeaderboard);
 router.route('/monthly').get(getMonthlyLeaderboard);
 router.route('/alltime').get(getAllTimeLeaderboard);

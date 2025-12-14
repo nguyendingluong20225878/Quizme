@@ -51,6 +51,10 @@ const ExamAttemptSchema = new mongoose.Schema(
       enum: ['in-progress', 'submitted', 'timeout'],
       default: 'in-progress',
     },
+    mode: {
+      type: String,
+      enum: ['sprint', 'marathon', 'weekly'],
+    },
     details: [
       {
         questionId: {

@@ -256,4 +256,96 @@ exports.getNextSuggestedNode = async (req, res, next) => {
   }
 };
 
+// @desc    Hoàn thành Boss Challenge
+// @route   POST /api/roadmap/stages/:stageId/boss/complete
+// @access  Private
+exports.completeBossChallenge = async (req, res, next) => {
+  try {
+    const { stageId } = req.params;
+    const { score, timeTaken } = req.body;
+    const userId = req.user.id;
+
+    // Find learning path and stage (node with type 'boss')
+    const path = await LearningPath.findOne({
+      'nodes.id': stageId,
+    });
+
+    if (!path) {
+      return res.status(404).json({
+        success: false,
+        message: 'Stage không tồn tại',
+      });
+    }
+
+    const bossNode = path.nodes.find(n => n.id === stageId && n.type === 'boss');
+    if (!bossNode) {
+      return res.status(404).json({
+        success: false,
+        message: 'Boss challenge không tồn tại',
+      });
+    }
+
+    let progress = await UserLearningProgress.findOne({
+      user: userId,
+      learningPath: path._id,
+    });
+
+    if (!progress) {
+      progress = await UserLearningProgress.create({
+        user: userId,
+        learningPath: path._id,
+        completedNodes: [],
+        totalXP: 0,
+      });
+    }
+
+    // Mark boss as completed
+    if (!progress.completedNodes.includes(stageId)) {
+      progress.completedNodes.push(stageId);
+    }
+
+    // Calculate XP earned
+    const xpEarned = bossNode.rewards?.xp || 100;
+    progress.totalXP += xpEarned;
+    await progress.save();
+
+    // Update user XP
+    const User = require('../models/User');
+    const XPHistory = require('../models/XPHistory');
+    const user = await User.findById(userId);
+    if (user) {
+      user.xp = (user.xp || 0) + xpEarned;
+      await user.save();
+
+      await XPHistory.create({
+        user: userId,
+        amount: xpEarned,
+        source: 'boss_challenge',
+        sourceId: stageId,
+        description: `Hoàn thành Boss Challenge: ${bossNode.title}`,
+      });
+    }
+
+    // Check if next stage is unlocked
+    const nextStage = path.nodes.find(n => {
+      if (n.id === stageId) return false;
+      const requirementsMet = (n.requirements || []).every(reqId =>
+        progress.completedNodes.includes(reqId)
+      );
+      return !n.requirements || n.requirements.length === 0 || requirementsMet;
+    });
+
+    const nextStageUnlocked = !!nextStage;
+
+    res.status(200).json({
+      success: true,
+      xpEarned,
+      nextStageUnlocked,
+      rewards: bossNode.rewards || {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 

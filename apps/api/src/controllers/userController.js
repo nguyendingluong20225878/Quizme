@@ -22,12 +22,61 @@ exports.getUsers = async (req, res, next) => {
   }
 };
 
+// @desc    Lấy thông tin user hiện tại
+// @route   GET /api/users/me
+// @access  Private
+exports.getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password').populate('selectedSubjects');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy người dùng',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Lấy thông tin user theo ID
 // @route   GET /api/users/:id
 // @access  Private
 exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).select('-password').populate('selectedSubjects');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy người dùng',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Cập nhật thông tin user hiện tại
+// @route   PUT /api/users/me
+// @access  Private
+exports.updateCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.user.id, req.body, {
+      new: true,
+      runValidators: true,
+    }).select('-password').populate('selectedSubjects');
 
     if (!user) {
       return res.status(404).json({

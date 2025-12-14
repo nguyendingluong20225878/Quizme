@@ -17,6 +17,9 @@ router.get('/:id', getLearningPath);
 router.post('/:id/nodes/:nodeId/complete', completeNode);
 router.get('/:id/next-suggested', getNextSuggestedNode);
 
+// Roadmap routes (alias)
+router.post('/stages/:stageId/boss/complete', require('../controllers/learningPathController').completeBossChallenge);
+
 module.exports = router;
 
 

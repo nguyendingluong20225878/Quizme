@@ -21,9 +21,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Target } from 'lucide-react';
 import { userService } from '../services/userService';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export function DashboardPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showChallenge5Min, setShowChallenge5Min] = useState(false);
   const [showExamRoom, setShowExamRoom] = useState(false);
@@ -68,15 +70,9 @@ export function DashboardPage() {
     fetchUserStats();
   }, [user]);
 
-  // Show Challenge 5 Min if active
-  if (showChallenge5Min) {
-    return <Challenge5MinContainer onExit={() => setShowChallenge5Min(false)} />;
-  }
-
-  // Show Exam Room if active
-  if (showExamRoom) {
-    return <ExamRoomContainer onExit={() => setShowExamRoom(false)} />;
-  }
+  // Navigate to routes instead of showing modals
+  // Challenge 5 Min và Exam Room giờ có routes riêng
+  // Có thể giữ lại modal hoặc navigate tùy UX preference
 
   // Main Dashboard
   return (
@@ -102,22 +98,45 @@ export function DashboardPage() {
                   <TabsTrigger value="dashboard" className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all">
                     Buồng Lái
                   </TabsTrigger>
-                  <TabsTrigger value="tests" className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all">
+                  <TabsTrigger 
+                    value="tests" 
+                    className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all"
+                    onClick={() => navigate('/test-library')}
+                  >
                     Phòng Thi
                   </TabsTrigger>
-                  <TabsTrigger value="golden" className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all">
+                  <TabsTrigger 
+                    value="golden" 
+                    className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all"
+                    onClick={() => navigate('/golden-time')}
+                  >
                     Thời Điểm Vàng
                   </TabsTrigger>
-                  <TabsTrigger value="analytics" className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all">
+                  <TabsTrigger 
+                    value="analytics" 
+                    className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all"
+                    onClick={() => navigate('/analytics')}
+                  >
                     Phân Tích
                   </TabsTrigger>
-                  <TabsTrigger value="roadmap" className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all">
+                  <TabsTrigger 
+                    value="roadmap" 
+                    className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all"
+                    onClick={() => navigate('/roadmap')}
+                  >
                     Lộ Trình
                   </TabsTrigger>
-                  <TabsTrigger value="achievements" className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all">
+                  <TabsTrigger 
+                    value="achievements" 
+                    className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all"
+                  >
                     Kho Vũ Khí
                   </TabsTrigger>
-                  <TabsTrigger value="profile" className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all">
+                  <TabsTrigger 
+                    value="profile" 
+                    className="h-8 px-4 text-slate-600 data-[state=active]:bg-white data-[state=active]:text-cyan-600 data-[state=active]:shadow-sm rounded-md transition-all"
+                    onClick={() => navigate('/profile')}
+                  >
                     Thành Tích
                   </TabsTrigger>
                 </TabsList>
@@ -158,12 +177,12 @@ export function DashboardPage() {
           {/* Dashboard Tab */}
           <TabsContent value="dashboard" className="space-y-6">
             <DashboardOptimized 
-              onStartChallenge5Min={() => setShowChallenge5Min(true)}
+              onStartChallenge5Min={() => navigate('/challenge-5min')}
               onStartAITeacherPractice={(topic) => {
                 setSelectedAITopic(topic);
                 setShowAITeacherPractice(true);
               }}
-              onOpenGoldenTime={() => setShowGoldenTimeFlashcard(true)}
+              onOpenGoldenTime={() => navigate('/golden-time')}
             />
           </TabsContent>
 
@@ -174,7 +193,7 @@ export function DashboardPage() {
 
           {/* Tests Hub Tab (Phòng Thi + Pha Chế + Thư viện) */}
           <TabsContent value="tests">
-            <TestsHub onOpenExamRoom={() => setShowExamRoom(true)} />
+            <TestsHub onOpenExamRoom={() => navigate('/exam-room')} />
           </TabsContent>
 
           {/* Golden Time Tab */}

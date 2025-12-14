@@ -41,10 +41,12 @@ api.interceptors.request.use(
 /**
  * Response Interceptor
  * Xử lý response và errors globally
+ * NOTE: This runs AFTER apiLogger interceptor
  */
 api.interceptors.response.use(
   (response) => {
     // Trả về data trực tiếp thay vì response object
+    // But keep original response for apiLogger
     return response.data;
   },
   (error: AxiosError<{ message?: string; errors?: any }>) => {
@@ -83,3 +85,14 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+// Import API logger AFTER export to ensure api is ready
+// This ensures apiLogger interceptors are registered
+// NOTE: apiLogger interceptors will run BEFORE the main response interceptor
+// because Axios runs interceptors in reverse order (last added runs first)
+if (process.env.NODE_ENV === 'development' || import.meta.env.DEV) {
+  // Use dynamic import to avoid blocking
+  import('../utils/apiLogger').catch(() => {
+    // Silently fail if apiLogger has issues - don't break the app
+  });
+}

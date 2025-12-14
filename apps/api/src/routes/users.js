@@ -8,7 +8,9 @@ const router = express.Router();
 const {
   getUsers,
   getUser,
+  getCurrentUser,
   updateUser,
+  updateCurrentUser,
   deleteUser,
 } = require('../controllers/userController');
 const {
@@ -40,6 +42,9 @@ router.route('/me/xp/history').get(getXPHistory);
 
 // Achievement routes
 router.route('/me/achievements').get(getUserAchievements);
+
+// User profile routes (must be before /:id)
+router.route('/me').get(getCurrentUser).put(updateCurrentUser);
 
 // User CRUD routes
 router.route('/:id').get(getUser).put(updateUser).delete(deleteUser);

@@ -16,4 +16,14 @@ export * from './roadmapService';
 export * from './aiTeacherService';
 export * from './contentService';
 
+// New services
+export * from './onboardingService';
+export * from './dashboardService';
+export * from './streakService';
+export * from './examRoomService';
+export * from './challenge5MinService';
+export * from './goldenTimeService';
+export * from './testLibraryService';
+export * from './profileService';
+
 export { default as api } from './api';
