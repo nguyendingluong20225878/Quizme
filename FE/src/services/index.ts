@@ -14,5 +14,6 @@ export * from './flashcardService';
 export * from './analyticsService';
 export * from './roadmapService';
 export * from './aiTeacherService';
+export * from './contentService';
 
 export { default as api } from './api';

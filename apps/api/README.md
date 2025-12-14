@@ -127,152 +127,58 @@ Server sẽ chạy tại: `http://localhost:5000`
 
 ### Authentication
 
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| POST | `/api/auth/register` | Đăng ký | ❌ |
-| POST | `/api/auth/login` | Đăng nhập | ❌ |
-| GET | `/api/auth/me` | Lấy thông tin user hiện tại | ✅ |
+|✅ Authentication
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/me
 
-### Users
+✅ User Management
+GET  /api/users/me
+PUT  /api/users/me
+GET  /api/users/me/xp
+POST /api/users/me/xp/add
+GET  /api/users/me/xp/history
 
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/users` | Lấy danh sách users | ✅ |
-| GET | `/api/users/:id` | Lấy thông tin user | ✅ |
-| PUT | `/api/users/:id` | Cập nhật user | ✅ |
-| DELETE | `/api/users/:id` | Xóa user | ✅ Admin |
-| GET | `/api/users/me/streak` | Lấy thông tin streak | ✅ |
-| POST | `/api/users/me/streak/checkin` | Check-in streak | ✅ |
-| GET | `/api/users/me/xp` | Lấy thông tin XP và Level | ✅ |
-| POST | `/api/users/me/xp/add` | Thêm XP | ✅ |
-| GET | `/api/users/me/xp/history` | Lấy lịch sử XP | ✅ |
-| GET | `/api/users/me/achievements` | Lấy achievements của user | ✅ |
+✅ Streak System (Basic)
+GET  /api/users/me/streak
+POST /api/users/me/streak/checkin
 
-### Subjects
+✅ Exams & Questions
+GET  /api/exams
+GET  /api/exams/:id
+POST /api/exams (admin)
+POST /api/exams/factory
+GET  /api/questions
+POST /api/questions (admin)
 
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/subjects` | Lấy danh sách môn học | ❌ |
-| GET | `/api/subjects/:id` | Lấy thông tin môn học | ❌ |
-| POST | `/api/subjects` | Tạo môn học mới | ✅ Admin |
-| PUT | `/api/subjects/:id` | Cập nhật môn học | ✅ Admin |
-| DELETE | `/api/subjects/:id` | Xóa môn học | ✅ Admin |
+✅ Exam Attempts
+POST /api/exam-attempts/start
+PUT  /api/exam-attempts/:id/answer
+POST /api/exam-attempts/:id/submit
+GET  /api/exam-attempts
+GET  /api/exam-attempts/:id
 
-### Exams
+✅ Achievements
+GET  /api/achievements
+GET  /api/achievements/progress
+POST /api/achievements/:id/unlock
 
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/exams` | Lấy danh sách đề thi | ❌ |
-| GET | `/api/exams/:id` | Lấy thông tin đề thi | ❌ |
-| POST | `/api/exams` | Tạo đề thi mới | ✅ Admin |
-| POST | `/api/exams/factory` | Tạo đề thi tùy chỉnh | ✅ |
-| PUT | `/api/exams/:id` | Cập nhật đề thi | ✅ Admin |
-| DELETE | `/api/exams/:id` | Xóa đề thi | ✅ Admin |
+✅ Missions
+GET  /api/missions/daily
+PATCH /api/missions/:id/progress
+POST /api/missions/:id/complete
 
-### Questions
+✅ Leaderboard
+GET  /api/leaderboard/weekly
+GET  /api/leaderboard/monthly
+GET  /api/leaderboard/alltime
+GET  /api/leaderboard/friends
 
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/questions` | Lấy danh sách câu hỏi | ❌ |
-| GET | `/api/questions/:id` | Lấy thông tin câu hỏi | ❌ |
-| POST | `/api/questions` | Tạo câu hỏi mới | ✅ Admin |
-| PUT | `/api/questions/:id` | Cập nhật câu hỏi | ✅ Admin |
-| DELETE | `/api/questions/:id` | Xóa câu hỏi | ✅ Admin |
-
-### Exam Attempts
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| POST | `/api/exam-attempts/start` | Bắt đầu làm bài | ✅ |
-| GET | `/api/exam-attempts` | Lấy lịch sử làm bài | ✅ |
-| PUT | `/api/exam-attempts/:id/answer` | Lưu câu trả lời | ✅ |
-| POST | `/api/exam-attempts/:id/submit` | Nộp bài thi | ✅ |
-| GET | `/api/exam-attempts/:id` | Lấy chi tiết kết quả | ✅ |
-
-### Topics
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/topics` | Lấy danh sách chuyên đề | ❌ |
-| GET | `/api/topics/:id` | Lấy thông tin chuyên đề | ❌ |
-| POST | `/api/topics` | Tạo chuyên đề mới | ✅ Admin |
-| PUT | `/api/topics/:id` | Cập nhật chuyên đề | ✅ Admin |
-| DELETE | `/api/topics/:id` | Xóa chuyên đề | ✅ Admin |
-
-### Formulas
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/formulas` | Lấy danh sách công thức | ❌ |
-| GET | `/api/formulas/:id` | Lấy thông tin công thức | ❌ |
-| POST | `/api/formulas` | Tạo công thức mới | ✅ Admin |
-| PUT | `/api/formulas/:id` | Cập nhật công thức | ✅ Admin |
-| DELETE | `/api/formulas/:id` | Xóa công thức | ✅ Admin |
-
-### Videos
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/videos` | Lấy danh sách video | ❌ |
-| GET | `/api/videos/:id` | Lấy thông tin video | ❌ |
-| POST | `/api/videos` | Tạo video mới | ✅ Admin |
-| PUT | `/api/videos/:id` | Cập nhật video | ✅ Admin |
-| DELETE | `/api/videos/:id` | Xóa video | ✅ Admin |
-
-### Competencies
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/competencies` | Lấy năng lực của user | ✅ |
-| PUT | `/api/competencies/:topicId` | Cập nhật năng lực | ✅ |
-
-### Tips
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/tips` | Lấy danh sách bí kíp | ❌ |
-| GET | `/api/tips/:id` | Lấy thông tin bí kíp | ❌ |
-| POST | `/api/tips/:id/save` | Lưu bí kíp | ✅ |
-| POST | `/api/tips` | Tạo bí kíp mới | ✅ Admin |
-| PUT | `/api/tips/:id` | Cập nhật bí kíp | ✅ Admin |
-| DELETE | `/api/tips/:id` | Xóa bí kíp | ✅ Admin |
-
-### Missions (Daily Missions)
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/missions/daily` | Lấy missions hàng ngày | ✅ |
-| PATCH | `/api/missions/:id/progress` | Cập nhật progress mission | ✅ |
-| POST | `/api/missions/:id/complete` | Hoàn thành mission | ✅ |
-
-### Achievements
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/achievements` | Lấy danh sách achievements | ❌ |
-| GET | `/api/achievements/progress` | Lấy progress achievements | ✅ |
-| POST | `/api/achievements/:id/unlock` | Unlock achievement | ✅ |
-
-### Leaderboard
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/leaderboard/weekly` | Leaderboard tuần | ❌ |
-| GET | `/api/leaderboard/monthly` | Leaderboard tháng | ❌ |
-| GET | `/api/leaderboard/alltime` | Leaderboard all-time | ❌ |
-| GET | `/api/leaderboard/friends` | Leaderboard bạn bè | ✅ |
-
-### Config
-
-| Method | Endpoint | Mô tả | Auth |
-|--------|----------|-------|------|
-| GET | `/api/config/levels` | Lấy cấu hình levels | ❌ |
-
-### Health Check
-
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| GET | `/api/health` | Kiểm tra trạng thái server |
+✅ Content Management
+GET  /api/subjects
+GET  /api/topics
+GET  /api/formulas
+GET  /api/tips
 
 ## 📁 Cấu trúc dự án
 
@@ -309,7 +215,7 @@ apps/api/
 └── README.md
 ```
 
-## 📊 Models
+##  Models
 
 ### User
 - Thông tin người dùng (học sinh, giáo viên, admin)
@@ -338,10 +244,6 @@ apps/api/
 - Công thức toán học
 - Thuộc topic và subject
 
-### Video
-- Video bài giảng
-- Thuộc topic và subject
-
 ### Achievement
 - Thành tích/huy hiệu
 
@@ -358,95 +260,4 @@ apps/api/
 
 ### Tip
 - Bí kíp/thủ thuật học tập
-
-## 🔐 Authentication
-
-API sử dụng JWT (JSON Web Token) để xác thực. Sau khi đăng nhập thành công, bạn sẽ nhận được token. Gửi token trong header:
-
-```
-Authorization: Bearer <your-token>
-```
-
-## 📝 Request/Response Examples
-
-### Đăng ký
-
-**Request:**
-```json
-POST /api/auth/register
-{
-  "fullName": "Nguyễn Văn A",
-  "email": "test@example.com",
-  "password": "123456",
-  "studentId": "01000071",
-  "grade": "12",
-  "className": "12A1"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Đăng ký thành công",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": "507f1f77bcf86cd799439011",
-    "fullName": "Nguyễn Văn A",
-    "email": "test@example.com",
-    "role": "student"
-  }
-}
-```
-
-### Làm bài thi
-
-**Request:**
-```json
-POST /api/exam-attempts/start
-{
-  "examId": "507f1f77bcf86cd799439011"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "id": "507f1f77bcf86cd799439012",
-    "user": "507f1f77bcf86cd799439011",
-    "exam": "507f1f77bcf86cd799439011",
-    "status": "in-progress",
-    "startedAt": "2024-01-01T10:00:00.000Z"
-  },
-  "exam": {
-    "title": "ĐỀ THI TỐT NGHIỆP THPT 2024",
-    "duration": 90,
-    "questions": [...]
-  }
-}
-```
-
-## 🐛 Troubleshooting
-
-### MongoDB connection error
-
-Đảm bảo MongoDB đang chạy và `MONGO_URI` trong file `.env` đúng.
-
-### Port already in use
-
-Thay đổi `PORT` trong file `.env` hoặc dừng ứng dụng đang chạy trên port đó.
-
-### JWT token invalid
-
-Kiểm tra `JWT_SECRET` trong file `.env` và đảm bảo token được gửi đúng format trong header.
-
-## 📄 License
-
-MIT
-
-## 👨‍💻 Tác giả
-
-QuizMe Team
 

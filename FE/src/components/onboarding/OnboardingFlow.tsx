@@ -1,3 +1,5 @@
+// FE/src/components/onboarding/OnboardingFlow.tsx
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoalSelection } from './GoalSelection';
@@ -5,14 +7,18 @@ import { SubjectSelection } from './SubjectSelection';
 import { PlacementTest } from './PlacementTest';
 import { useAuth } from '../../contexts/AuthContext';
 
-// ✅ THÊM ROUTER
-import { useRouter } from 'next/navigation';
+// ❌ ĐÃ XÓA: import { useRouter } from 'next/navigation'; // Hook Next.js gây lỗi
 
 type OnboardingStep = 'goal' | 'subject' | 'placement';
 
-export function OnboardingFlow() {
+// ✅ THÊM PROP ĐỂ XỬ LÝ CHUYỂN TRANG
+type OnboardingFlowProps = {
+  onOnboardingComplete: () => void;
+}
+
+export function OnboardingFlow({ onOnboardingComplete }: OnboardingFlowProps) {
   const { completeOnboarding } = useAuth();
-  const router = useRouter(); // ✅ KHỞI TẠO ROUTER
+  // ❌ ĐÃ XÓA: const router = useRouter(); // Hook Next.js gây lỗi
 
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('goal');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
@@ -28,26 +34,14 @@ export function OnboardingFlow() {
     setCurrentStep('placement');
   };
 
-  // ✅ FIX LOGIC TẠI ĐÂY
+  // ✅ LOGIC CHUYỂN TRANG TỰ ĐỘNG KHI CHƯA CÓ AI
   const handlePlacementComplete = async (level: number) => {
-    // ✅ 1. LƯU THÔNG TIN ONBOARDING
+    // 1. LƯU THÔNG TIN ONBOARDING
     await completeOnboarding(selectedGoals, selectedSubjects, level);
 
-    // ✅ 2. CỜ BẬT/TẮT AI (SAU NÀY CHỈ CẦN ĐỔI true)
-    const HAS_AI = false;
-
-    if (HAS_AI) {
-      // 🔮 SAU NÀY BẠN GỌI AI Ở ĐÂY
-      // await fetch('/api/ai-recommend', { method: 'POST', body: JSON.stringify({ level }) })
-      // router.push('/ai-result');
-    } else {
-      // ✅ HIỆN TẠI: CHƯA CÓ AI → CHUYỂN TRANG LUÔN
-      router.push('/dashboard'); 
-      // 👉 bạn có thể đổi thành:
-      // router.push('/home');
-      // router.push('/learning');
-      // router.push('/profile');
-    }
+    // 2. TỰ ĐỘNG BỎ QUA AI VÀ CHUYỂN TRANG
+    // Việc này sẽ kích hoạt re-render AppContent và chuyển sang Dashboard
+    onOnboardingComplete(); 
   };
 
   return (
@@ -126,7 +120,7 @@ export function OnboardingFlow() {
             >
               <PlacementTest
                 subjects={selectedSubjects}
-                onComplete={handlePlacementComplete} // ✅ ĐÃ GẮN LOGIC MỚI
+                onComplete={handlePlacementComplete}
                 onBack={() => setCurrentStep('subject')}
               />
             </motion.div>

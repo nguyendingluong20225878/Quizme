@@ -30,40 +30,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // ✅ KHÔNG AUTO-LOGIN: Luôn bắt đầu từ trạng thái không đăng nhập
+  // Chỉ đăng nhập khi user bấm Login thành công
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Check for existing session on mount
-  useEffect(() => {
-    const initAuth = async () => {
-      const token = authService.getToken();
-      
-      if (token) {
-        try {
-          // Fetch user data from backend
-          const userData = await authService.getMe();
-          setUser({
-            id: userData.id,
-            name: userData.fullName,
-            email: userData.email,
-            avatar: userData.avatar,
-            onboardingCompleted: userData.onboardingCompleted,
-            goals: userData.goals,
-            subjects: userData.subjects,
-            level: userData.level,
-            xp: userData.xp,
-          });
-        } catch (error) {
-          // Token invalid or expired
-          console.error('Auth initialization error:', error);
-          authService.logout();
-        }
-      }
-      
-      setIsLoading(false);
-    };
-
-    initAuth();
-  }, []);
+  // ❌ ĐÃ XÓA: useEffect auto-restore session
+  // Luôn bắt đầu từ trang login, không auto-login
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
@@ -138,24 +110,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completeOnboarding = async (goals: string[], subjects: string[], placementLevel: number) => {
     if (user) {
       try {
-        // Update via API
-        await userService.updateProfile({
-          onboardingCompleted: true,
-          goals,
-          subjects,
-        });
-        
-        // Update local state
-        const updatedUser = {
-          ...user,
-          onboardingCompleted: true,
-          goals,
-          subjects,
-          level: placementLevel,
-        };
-        setUser(updatedUser);
+        // Update via API - nếu API fail thì chỉ update local state
+        try {
+          await userService.updateProfile({
+            onboardingCompleted: true,
+            goals,
+            subjects,
+          });
+          
+          // Nếu API success, fetch lại user từ API
+          const userData = await authService.getMe();
+          setUser({
+            id: userData.id,
+            name: userData.fullName,
+            email: userData.email,
+            avatar: userData.avatar,
+            onboardingCompleted: userData.onboardingCompleted,
+            goals: userData.goals,
+            subjects: userData.subjects,
+            level: userData.level,
+            xp: userData.xp,
+          });
+        } catch (apiError) {
+          // Nếu API fail (403 hoặc lỗi khác), vẫn update local state để tiếp tục flow
+          console.warn('API update failed, updating local state only:', apiError);
+          const updatedUser = {
+            ...user,
+            onboardingCompleted: true,
+            goals,
+            subjects,
+            level: placementLevel,
+          };
+          setUser(updatedUser);
+        }
       } catch (error) {
         console.error('Complete onboarding error:', error);
+        throw error; // Throw error để handleComplete có thể catch
       }
     }
   };

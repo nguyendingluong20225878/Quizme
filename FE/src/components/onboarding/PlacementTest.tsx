@@ -178,7 +178,7 @@ export function PlacementTest({ subjects, onComplete, onBack }: PlacementTestPro
             <CardContent className="space-y-6">
               <Alert className="border-2 border-teal-300 bg-teal-50">
                 <AlertDescription className="text-gray-700">
-                  <strong>AI Coach sẽ đánh giá trình độ của bạn</strong> qua 10 câu hỏi ngắn (khoảng 10 phút).
+                  <strong>Bạn sẽ làm bài kiểm tra đánh giá trình độ</strong> qua 10 câu hỏi ngắn (khoảng 10 phút).
                   <br />
                   <br />
                   Dựa vào kết quả này, QuizMe sẽ:
@@ -385,7 +385,7 @@ export function PlacementTest({ subjects, onComplete, onBack }: PlacementTestPro
                 Bạn trả lời đúng <strong className="text-teal-600 text-2xl">{correctCount}/{placementQuestions.length}</strong> câu
               </p>
               <p className="text-gray-700">
-                AI Coach xếp bạn vào <strong className="text-orange-600 text-3xl">Level {calculatedLevel}</strong>
+                Bạn được xếp vào <strong className="text-orange-600 text-3xl">Level {calculatedLevel}</strong>
               </p>
             </div>
 

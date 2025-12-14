@@ -54,7 +54,9 @@ export function GoalSelection({ onComplete }: GoalSelectionProps) {
     );
   };
 
-  const handleContinue = () => {
+  const handleContinue = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (selectedGoals.length > 0) {
       onComplete(selectedGoals);
     }

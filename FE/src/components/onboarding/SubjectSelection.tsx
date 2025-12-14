@@ -63,7 +63,9 @@ export function SubjectSelection({ onComplete, onBack }: SubjectSelectionProps) 
     );
   };
 
-  const handleContinue = () => {
+  const handleContinue = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (selectedSubjects.length > 0) {
       onComplete(selectedSubjects);
     }
