@@ -31,7 +31,7 @@ function getXPForCurrentLevel(level) {
 exports.addXP = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { amount, source, sourceId, description } = req.body;
+    const { amount, source, sourceId, description, metadata } = req.body;
 
     if (!amount || amount <= 0) {
       return res.status(400).json({
@@ -65,21 +65,16 @@ exports.addXP = async (req, res, next) => {
       source: source || 'other',
       sourceId: sourceId || null,
       description: description || `Nhận ${amount} XP`,
+      metadata: metadata || {},
       levelBefore,
       levelAfter,
     });
 
     res.status(200).json({
-      success: true,
-      data: {
-        xp: user.xp,
-        level: user.level,
-        levelBefore,
-        levelAfter,
-        xpHistory,
-        leveledUp: levelAfter > levelBefore,
-      },
-      message: levelAfter > levelBefore ? `Chúc mừng! Bạn đã lên level ${levelAfter}` : 'Thêm XP thành công',
+      newXP: user.xp,
+      leveledUp: levelAfter > levelBefore,
+      newLevel: levelAfter,
+      rewards: [],
     });
   } catch (error) {
     next(error);
@@ -138,24 +133,21 @@ exports.getXPInfo = async (req, res, next) => {
     const currentXP = user.xp || 0;
     const xpForCurrentLevel = getXPForCurrentLevel(currentLevel);
     const xpForNextLevel = getXPForNextLevel(currentLevel);
-    const xpNeeded = xpForNextLevel - currentXP;
-    const xpProgress = currentXP - xpForCurrentLevel;
-    const xpRequired = xpForNextLevel - xpForCurrentLevel;
-    const progressPercent = xpRequired > 0 ? (xpProgress / xpRequired) * 100 : 100;
+    
+    // XP gained within the current level (XP that contributes to next level progress)
+    const xpInCurrentLevel = currentXP - xpForCurrentLevel;
+    
+    // Total XP required to complete the current level
+    const xpRequiredForNextLevel = xpForNextLevel - xpForCurrentLevel;
+    
+    const progress = xpRequiredForNextLevel > 0 ? (xpInCurrentLevel / xpRequiredForNextLevel) * 100 : 100;
 
     res.status(200).json({
-      success: true,
-      data: {
-        xp: currentXP,
-        level: currentLevel,
-        xpForCurrentLevel,
-        xpForNextLevel,
-        xpNeeded,
-        xpProgress,
-        xpRequired,
-        progressPercent: Math.min(progressPercent, 100),
-      },
-      message: 'Lấy thông tin XP thành công',
+      level: currentLevel,
+      currentXP: xpInCurrentLevel,
+      nextLevelXP: xpRequiredForNextLevel,
+      totalXP: currentXP,
+      progress: Math.min(progress, 100),
     });
   } catch (error) {
     next(error);

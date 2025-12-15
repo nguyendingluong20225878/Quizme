@@ -10,6 +10,7 @@ const FlashcardProgressSchema = new mongoose.Schema(
     interval: { type: Number, default: 1 },
     repetitions: { type: Number, default: 0 },
     lapses: { type: Number, default: 0 },
+    mastered: { type: Boolean, default: false },
   },
   {
     timestamps: true,

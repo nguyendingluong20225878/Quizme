@@ -37,6 +37,10 @@ const XPHistorySchema = new mongoose.Schema(
       type: Number,
       default: 1,
     },
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
   },
   {
     timestamps: true,

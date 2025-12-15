@@ -16,6 +16,14 @@ const FormulaSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Vui lòng nhập công thức'],
     },
+    latex: {
+      type: String,
+      default: null,
+    },
+    example: {
+      type: String,
+      default: null,
+    },
     category: {
       type: String,
       required: true,
