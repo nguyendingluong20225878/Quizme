@@ -67,6 +67,8 @@ app.use('/api/golden-time', require('./routes/goldenTime'));
 app.use('/api/tests', require('./routes/testLibrary'));
 app.use('/api/roadmap', require('./routes/learningPaths')); // Alias for learning-paths
 app.use('/api/profile', require('./routes/profile'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/settings', require('./routes/settings'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
