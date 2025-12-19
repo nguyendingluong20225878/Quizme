@@ -8,11 +8,11 @@ const Subject = require('../models/Subject');
 const Topic = require('../models/Topic');
 const FlashcardProgress = require('../models/FlashcardProgress');
 const xpController = require('./xpController');
-const jwt = require('jsonwebtoken');
+
 
 // @desc    Lấy danh sách tất cả formulas
 // @route   GET /api/formulas
-// @access  Public
+// @access  Private
 exports.getFormulas = async (req, res, next) => {
   try {
     const { category, topic, subject, search } = req.query;
@@ -73,53 +73,33 @@ exports.getFormulas = async (req, res, next) => {
       .sort({ category: 1, title: 1 })
       .lean(); // Use lean() to allow adding properties
 
-    // Xử lý thông tin progress nếu user đã login
-    let userId = null;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      try {
-        const token = req.headers.authorization.split(' ')[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'de-yen-nhu-z-code-van-chay-nha');
-        userId = decoded.id;
-      } catch (err) {
-        // Token lỗi -> coi như chưa login, không throw error
-        console.log('Token verification failed in getFormulas:', err.message);
-      }
-    }
+    // Xử lý thông tin progress (user đã login)
+    const userId = req.user._id;
 
-    if (userId) {
-       // Lấy progress của user cho các formula này
-       const formulaIds = formulas.map(f => f._id);
-       const progresses = await FlashcardProgress.find({
-         user: userId,
-         formula: { $in: formulaIds }
-       });
+    // Lấy progress của user cho các formula này
+    const formulaIds = formulas.map(f => f._id);
+    const progresses = await FlashcardProgress.find({
+      user: userId,
+      formula: { $in: formulaIds }
+    });
 
-       // Map progress vào formula
-       const progressMap = {};
-       progresses.forEach(p => {
-         progressMap[p.formula.toString()] = p;
-       });
+    // Map progress vào formula
+    const progressMap = {};
+    progresses.forEach(p => {
+      progressMap[p.formula.toString()] = p;
+    });
 
-       formulas.forEach(f => {
-         const p = progressMap[f._id.toString()];
-         if (p) {
-           f.mastered = p.mastered || false;
-           f.reviewCount = p.repetitions || 0;
-           f.nextReviewAt = p.nextReviewAt;
-         } else {
-           f.mastered = false;
-           f.reviewCount = 0;
-         }
-         // Xóa id objects sau khi populate để client dễ dùng nếu cần (đã có name)
-         // Nhưng ở đây giữ nguyên structure cũ
-       });
-    } else {
-      // Default values
-      formulas.forEach(f => {
+    formulas.forEach(f => {
+      const p = progressMap[f._id.toString()];
+      if (p) {
+        f.mastered = p.mastered || false;
+        f.reviewCount = p.repetitions || 0;
+        f.nextReviewAt = p.nextReviewAt;
+      } else {
         f.mastered = false;
         f.reviewCount = 0;
-      });
-    }
+      }
+    });
 
     res.status(200).json({
       success: true,
@@ -133,7 +113,7 @@ exports.getFormulas = async (req, res, next) => {
 
 // @desc    Lấy thông tin formula theo ID
 // @route   GET /api/formulas/:id
-// @access  Public
+// @access  Private
 exports.getFormula = async (req, res, next) => {
   try {
     const formula = await Formula.findById(req.params.id)

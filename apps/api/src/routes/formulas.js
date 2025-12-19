@@ -15,10 +15,10 @@ const {
 } = require('../controllers/formulaController');
 const { protect } = require('../middleware/auth');
 
-router.route('/').get(getFormulas).post(protect, createFormula);
+router.route('/').get(protect, getFormulas).post(protect, createFormula);
 router
   .route('/:id')
-  .get(getFormula)
+  .get(protect, getFormula)
   .put(protect, updateFormula)
   .delete(protect, deleteFormula);
 
